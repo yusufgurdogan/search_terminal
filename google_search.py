@@ -105,6 +105,22 @@ def display_results(results):
         print(f"{result.get('snippet', 'No description available')}")
         print()
 
+def get_default_engine(provider):
+    """
+    Get the default search engine for a provider
+    """
+    if not provider:
+        return None
+    
+    try:
+        engines = provider.get_available_engines()
+        if engines and len(engines) > 0:
+            return engines[0]
+    except Exception:
+        pass
+    
+    return None
+
 def interactive_search(config, providers):
     """
     Run an interactive search session
@@ -124,6 +140,14 @@ def interactive_search(config, providers):
     if not provider:
         print(f"{Colors.RED}Failed to load provider '{provider_name}'. Exiting.{Colors.ENDC}")
         return
+    
+    # Ensure the engine is valid for this provider
+    available_engines = provider.get_available_engines()
+    if engine not in available_engines:
+        engine = get_default_engine(provider)
+        config["engine"] = engine
+        save_config(config)
+        print(f"{Colors.YELLOW}Selected engine is not available for this provider. Using default: {engine}{Colors.ENDC}")
     
     clear_screen()
     print(f"{Colors.HEADER}╭───────────────────────────────────╮{Colors.ENDC}")
@@ -162,8 +186,16 @@ def interactive_search(config, providers):
                         provider = load_provider(provider_name)
                         if provider:
                             config["provider"] = provider_name
+                            
+                            # Set default engine for the new provider
+                            default_engine = get_default_engine(provider)
+                            if default_engine:
+                                engine = default_engine
+                                config["engine"] = engine
+                                print(f"{Colors.BLUE}Provider changed to: {Colors.BOLD}{provider_name.upper()}{Colors.ENDC}")
+                                print(f"{Colors.BLUE}Default engine set to: {Colors.BOLD}{engine.upper()}{Colors.ENDC}")
+                            
                             save_config(config)
-                            print(f"{Colors.BLUE}Provider changed to: {Colors.BOLD}{provider_name.upper()}{Colors.ENDC}")
                         else:
                             print(f"{Colors.RED}Failed to load provider.{Colors.ENDC}")
                     else:
@@ -273,9 +305,16 @@ def main():
         print(f"{Colors.RED}Failed to load provider '{provider_name}'.{Colors.ENDC}")
         return
     
+    # Ensure the engine is valid for this provider
+    engine = args.engine
+    available_engines = provider.get_available_engines()
+    if engine not in available_engines:
+        engine = get_default_engine(provider)
+        if args.engine != config.get("engine"):
+            print(f"{Colors.YELLOW}Specified engine '{args.engine}' is not available for this provider. Using default: {engine}{Colors.ENDC}")
+    
     if args.query:
         # Non-interactive mode
-        engine = args.engine
         print(f"{Colors.YELLOW}Searching for '{args.query}' via {provider_name.capitalize()} ({engine})...{Colors.ENDC}")
         
         try:

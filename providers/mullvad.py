@@ -72,36 +72,47 @@ def parse_search_results(json_response):
             # Parse the data string into a JSON object
             data = json.loads(json_response["data"])
             
-            # Extract information about the results
-            if isinstance(data, list) and len(data) > 5:
-                items_indices = data[5]  # List of indices for result items
-                
+            # The data is a complex structure. Let's extract the keys from the first object
+            if isinstance(data, list) and len(data) > 0:
+                header = data[0]
                 results = []
-                for item_index in items_indices:
-                    if item_index >= len(data):
-                        continue
+                
+                # Check if the required keys exist
+                if "items" in header and isinstance(header["items"], int):
+                    items_index = header["items"]
+                    if items_index < len(data) and isinstance(data[items_index], list):
+                        item_indices = data[items_index]
                         
-                    item_struct = data[item_index]
-                    if not isinstance(item_struct, dict):
-                        continue
-                        
-                    # Extract link, title, and snippet
-                    link_index = item_struct.get("link")
-                    title_index = item_struct.get("title")
-                    snippet_index = item_struct.get("snippet")
-                    
-                    if link_index is None or title_index is None:
-                        continue
-                        
-                    link = data[link_index] if link_index < len(data) else "No link available"
-                    title = data[title_index] if title_index < len(data) else "No title available"
-                    snippet = data[snippet_index] if snippet_index and snippet_index < len(data) else "No description available"
-                    
-                    results.append({
-                        "title": title,
-                        "link": link,
-                        "snippet": snippet
-                    })
+                        # Process each search result
+                        for idx in item_indices:
+                            if isinstance(idx, int) and idx < len(data):
+                                item_struct = data[idx]
+                                if isinstance(item_struct, dict) and "link" in item_struct and "title" in item_struct:
+                                    link_index = item_struct.get("link")
+                                    title_index = item_struct.get("title")
+                                    snippet_index = item_struct.get("snippet")
+                                    
+                                    # Now extract the actual values from their respective indices
+                                    if isinstance(link_index, int) and link_index < len(data):
+                                        link = data[link_index]
+                                    else:
+                                        link = "No link available"
+                                    
+                                    if isinstance(title_index, int) and title_index < len(data):
+                                        title = data[title_index]
+                                    else:
+                                        title = "No title available"
+                                    
+                                    if isinstance(snippet_index, int) and snippet_index < len(data):
+                                        snippet = data[snippet_index]
+                                    else:
+                                        snippet = "No description available"
+                                    
+                                    results.append({
+                                        "title": title,
+                                        "link": link,
+                                        "snippet": snippet
+                                    })
                 
                 return results
     except Exception as e:
