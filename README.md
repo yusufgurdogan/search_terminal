@@ -1,6 +1,11 @@
-# Privacy-Focused Search Terminal Tool
+# Search Terminal Tool
 
-A versatile command-line search tool that allows you to search the web through privacy-focused search proxies and engines. This modular tool supports multiple search providers and engines, with options for automatic fallback and private browsing.
+A versatile command-line search tool that allows you to search the web through search proxies and engines. This modular tool supports multiple search providers and engines, with options for automatic fallback and private browsing.
+
+> Oh hey! This is the only part I personally wrote.
+> The code and this README were written by Claude Sonnet 3.7 (except this part! :D)
+> This can be a good alternative to yagooglesearch, which scrapes Google directly. Google's ToS does not allow scraping.
+> This tool only includes providers whose ToS do not disallow scraping.
 
 ## Features
 
@@ -141,7 +146,3 @@ The tool saves your configuration in `~/.config/search_terminal/config.json`, in
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Privacy Considerations
-
-This tool interfaces with various search providers that may have different privacy practices. While the providers used generally focus on privacy, please review their privacy policies for complete information.
